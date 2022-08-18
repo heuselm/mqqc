@@ -2,3 +2,5 @@
 *files*
 *.html
 *.pdf
+.Rproj.user
+*.Rproj
