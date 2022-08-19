@@ -113,7 +113,7 @@ p2 = ggplot(ev_combined, aes(text = Raw_file)) +
   geom_boxplot(aes(x = as.character(Acq_day), y = Mass_error_ppm, color = Sample_id, group = Raw_file)) +
   theme_minimal() + 
   theme(axis.text.x = element_text(angle = 90)) +
-  facet_grid(LC_meth~Acq_day,  scales = "free_x") +
+  facet_grid(~Acq_day,  scales = "free_x") +
   geom_hline(yintercept = 0, lty = 2) +
   ggtitle("Mass errors [ppm]")
 p2
