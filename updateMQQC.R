@@ -84,7 +84,7 @@ latest_n = sort(unique(ev_combined$Acq_day), decreasing = T)[1:n_latest]
 ids.prot = ev_combined[, length(unique(Proteins)), by = names(ann)]
 ids.pep = ev_combined[, length(unique(Modified_sequence)), by = names(ann)]
 ids = rbind(ids.prot[, level:="Protein.groups"],
-                  ids.pep[, level:="Peptides"])
+            ids.pep[, level:="Peptides"])
 
 names(ids)
 
@@ -113,7 +113,7 @@ p2 = ggplot(ev_combined, aes(text = Raw_file)) +
   geom_boxplot(aes(x = as.character(Acq_day), y = Mass_error_ppm, color = Sample_id, group = Raw_file)) +
   theme_minimal() + 
   theme(axis.text.x = element_text(angle = 90)) +
-  #facet_grid(~Acq_day,  scales = "free_x") +
+  # facet_grid(~Acq_day,  scales = "free_x") +
   geom_hline(yintercept = 0, lty = 2) +
   ggtitle(paste(MSname, "Mass errors [ppm]"))
 p2
@@ -128,7 +128,7 @@ p3 = ggplot(ev_combined[Acq_day %in% latest_n]) +
   geom_density(aes(x = Retention_time, y = ..count.., color = as.character(Acq_day), group = Raw_file), adjust = 0.2) +
   theme_minimal() + 
   facet_grid(~LC_meth, scales = "free") +
-  ggtitle(paste(n_latest, "latest QC sets - Identification density along RT"))
+  ggtitle(paste0("Identification density along RT", "( ", n_latest, " latest QCs)"))
 p3
 ggsave("QC_ID_density_along_RT.pdf", height = length(unique(ev_combined$LC_meth))*3, width = (ndirs/4)+3)
 htmlwidgets::saveWidget(ggplotly(p3), file = "QC_ID_density_along_RT.html")
@@ -143,13 +143,14 @@ p4 = ggplot(ev_combined[Acq_day %in% latest_n]) +
                outlier.shape = NA) +
   theme_minimal() + 
   theme(axis.text.x = element_text(angle = 90)) +
-  facet_grid(LC_meth~Acq_day,  scales = "free") +
+  facet_grid(LC_meth~Acq_day) +
   theme(legend.position = "none") +
-  ggtitle("Peak width per RT section") +
+  coord_cartesian(ylim = c(0,0.6)) +
+  ggtitle(paste0("Peak width per RT section", "( ", n_latest, " latest QCs)")) +
   xlab("Retention time range")
 p4
 ggsave("QC_Retention_length.pdf", height = length(unique(ev_combined$LC_meth))*3, width = (nruns/4)+3)
-htmlwidgets::saveWidget(ggplotly(p3), file = "QC_Retention_length.html")
+htmlwidgets::saveWidget(ggplotly(p4), file = "QC_Retention_length.html")
 # ggplotly(p4)
 
 #'## RT of specific HeLa peptides DSYVGDEAQSK_599.765++, GYSFTTTAER_566.76++, TVTAMDVVYALK_655.855++
