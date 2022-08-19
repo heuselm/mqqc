@@ -16,6 +16,7 @@ library('htmlwidgets')
 
 # evosep color scheme
 escolors = c("#87B09A", "#FF671B", "#D1E0D7", "#222720", "#8A8A8D")
+n_latest = 5
 
 # get working directory name as name of the MS instrument
 MSname = basename(getwd())
@@ -73,6 +74,9 @@ ann = fread("runAnnotation.csv")
 nruns = length(unique(ev_combined$Raw_file))
 ev_combined = merge(ev_combined, ann, by = "Raw_file")
 
+# define n latest n QC analyses:
+latest_n = sort(unique(ev_combined$Acq_day), decreasing = T)[1:n_latest]
+
 # View(unique(ev_combined[, .(Raw_file, Acq_day, analysis_directory)]))
 
 #'## Count & plot IDs
@@ -91,7 +95,7 @@ p1 = ggplot(ids,
   ggtitle(paste(MSname, "QC Identifications MaxQuant")) +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 90)) +
-  geom_text(aes(x = as.character(Acq_day), y = V1, label=V1), vjust = -2, cex = 4)  +
+  #geom_text(aes(x = as.character(Acq_day), y = V1, label=V1), vjust = -2, cex = 4)  +
   ylab("N") +
   facet_wrap(level~LC_meth, scales = "free") +
   theme(axis.text.x=element_text()) + 
@@ -120,11 +124,11 @@ htmlwidgets::saveWidget(ggplotly(p2), file = "QC_Mass_error_ppm.html")
 #'## ID over RT density plots / 'IDTic'
 #+ r ID over RT density plots
 names(ev_combined)
-p3 = ggplot(ev_combined) +
-  geom_density(aes(x = Retention_time, y = ..count.., color = Sample_id, group = Raw_file), adjust = 0.2) +
+p3 = ggplot(ev_combined[Acq_day %in% latest_n]) +
+  geom_density(aes(x = Retention_time, y = ..count.., color = as.character(Acq_day), group = Raw_file), adjust = 0.2) +
   theme_minimal() + 
-  facet_grid(LC_meth~Acq_day, scales = "free") +
-  ggtitle("Identification density distribution along RT")
+  facet_grid(~LC_meth, scales = "free") +
+  ggtitle(paste(n_latest, "latest QC sets - Identification density along RT"))
 p3
 ggsave("QC_ID_density_along_RT.pdf", height = length(unique(ev_combined$LC_meth))*3, width = (ndirs/4)+3)
 htmlwidgets::saveWidget(ggplotly(p3), file = "QC_ID_density_along_RT.html")
@@ -133,7 +137,7 @@ htmlwidgets::saveWidget(ggplotly(p3), file = "QC_ID_density_along_RT.html")
 #'## Peak shape / retention length per RT segment
 #+ Peak shape / retention length per RT segment
 names(ev_combined)
-p4 = ggplot(ev_combined) +
+p4 = ggplot(ev_combined[Acq_day %in% latest_n]) +
   geom_boxplot(aes(x = cut(Retention_time, 5), y = Retention_length, color = Raw_file),
                position = position_dodge2(preserve = "single"),
                outlier.shape = NA) +
@@ -142,7 +146,7 @@ p4 = ggplot(ev_combined) +
   facet_grid(LC_meth~Acq_day,  scales = "free") +
   theme(legend.position = "none") +
   ggtitle("Peak width per RT section") +
-  xlab("Retention time quantile bin")
+  xlab("Retention time range")
 p4
 ggsave("QC_Retention_length.pdf", height = length(unique(ev_combined$LC_meth))*3, width = (nruns/4)+3)
 htmlwidgets::saveWidget(ggplotly(p3), file = "QC_Retention_length.html")
@@ -152,7 +156,7 @@ htmlwidgets::saveWidget(ggplotly(p3), file = "QC_Retention_length.html")
 #+ r RT of specific HeLa peptides
 targets_hela = c("DSYVGDEAQSK", "GYSFTTTAER", "TVTAMDVVYALK")
 p5 = ggplot(ev_combined[Sequence %in% targets_hela],
-            aes(x = Acq_day,
+            aes(x = as.character(Acq_day),
                 y = Retention_time,
                 col = paste(Modified_sequence,
                             Charge, m_z),
