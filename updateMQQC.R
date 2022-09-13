@@ -179,10 +179,11 @@ htmlwidgets::saveWidget(ggplotly(p5), file = "QC_HeLa_3peptides_RTs.html")
 #'## MaxQuant Summary
 #+ r MaxQuant Summary
 names(summary_combined)
-summary_combined[, Acq_day:=as.character(Acq_day)]
 
 # merge annotation
 summary_combined_ann = merge(summary_combined, ann, by = "Raw_file")
+summary_combined_ann[, Acq_day:=as.character(Acq_day)]
+
 # write combined csv table
 fwrite(summary_combined_ann, file = "QC_Summary_table.csv")
 # select columns for graphs
