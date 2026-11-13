@@ -76,7 +76,7 @@ paths, reference peptides and annotation fields to your lab.
 
 ## License
 
-GPL-3.0 — see [LICENSE](LICENSE).
+Apache-2.0 — see [LICENSE](LICENSE).
 
 ---
 <sub>README optimized with Claude Opus 5.5.</sub>
